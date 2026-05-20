@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+ <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fanfic Recs — Rocío</title>
+    <link rel="stylesheet" href="styles.css">
+ </head>
+ <body>
+
+
+  <input type="checkbox" id="menu-toggle">
+
+  <header>
+   <label for="menu-toggle" class="menu-btn">☰</label>
+   <div>
+     <h1>Fanfic Recs</h1>
+     <p class="subtitulo">mis favoritos de Ao3</p>
+   </div>
+  </header>
+
+  <!-- Nav hamburguesa: lo ves solo en el celu-->
+  <nav id="nav-mobile">
+    <ul>
+      <li><a href="#AOT">Attack on Titan</a></li>
+      <li><a href="#Arcane">Arcane</a></li>
+      <li><a href="#HOTD">House of the Dragon</a></li>
+      <li><a href="#AUs">AU's</a></li>
+    </ul>
+  </nav>
+
+  <!-- Menú dinámico tipo biblioteca — visible solo en tablet/desktop -->
+  <div id="biblioteca"></div>
+
+  <main>
+    <p class="intro">
+      En esta página web vas a poder organizar tus fanfics por  categorías según los fandoms, para que ya no debas tener 45 tabs de chrome abiertas y tus fanfics desordenados. 
+    </p>
+
+    <section id="AOT">
+        <h2>Attack on Titan</h2>
+        <ul>
+            <li>Título 1</li>
+            <li>Título 2</li>
+            <li>Título 3</li>
+            <li>Título 4</li>
+        </ul>
+    </section>
+
+    <section id="Arcane">
+        <h2>Arcane</h2>
+        <ul>
+            <li>Título 1</li>
+            <li>Título 2</li>
+            <li>Título 3</li>
+            <li>Título 4</li>
+        </ul>
+    </section>
+
+    <section id="HOTD">
+        <h2>House of the Dragon</h2>
+        <ul>
+            <li>Título 1</li>
+            <li>Título 2</li>
+            <li>Título 3</li>
+            <li>Título 4</li>
+        </ul>
+    </section>
+
+    <section id="AUs">
+        <h2>AU's</h2>
+        <ul>
+            <li>Título 1</li>
+            <li>Título 2</li>
+            <li>Título 3</li>
+            <li>Título 4</li>
+        </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>Diseñado por <strong>Rocío Monzón</strong></p>
+  </footer>
+
+  <script src="Biblioteca.js"></script>
+  <script>
+    // Cierra el menú hamburguesa mobile al hacer click en cualquier link
+    document.querySelectorAll('#nav-mobile a').forEach(function(link) {
+      link.addEventListener('click', function() {
+        document.getElementById('menu-toggle').checked = false;
+      });
+    });
+  </script>
+
+ </body>
+</html>
