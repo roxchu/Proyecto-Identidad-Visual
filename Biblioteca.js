@@ -1,25 +1,29 @@
-/*
- biblioteca.js — Menú dinámico tipo biblioteca para Fanfic Recs
- 
- * FLUJO DE ESTADOS:
- 1. LOMOS  → Se ven los lomos de los libros en la estantería
- 2. PORTADA → Al hacer click en un lomo, el libro se "saca" y muestra su portada
- 3. LIBRO ABIERTO → Al hacer click en la portada, el libro se abre mostrando el índice
- 4. PÁGINA → Al hacer click en un título del índice, se muestra la ficha del fanfic
- 
- CONCEPTOS JS USADOS:
- - Array de objetos: para guardar los datos de cada fandom y sus fanfics
- - DOM Manipulation: createElement, innerHTML, classList, appendChild
- - Event Listeners: click para manejar cada transición de estado
- - CSS Classes: agregar/quitar clases para disparar animaciones CSS
- - Template literals: construir HTML dinámico con datos del array
-*/
+/**
+ * biblioteca.js — Menú dinámico tipo biblioteca con efecto libro 3D
+ *
+ * TÉCNICA CSS 3D (inspirada en: https://www.youtube.com/watch?v=mriZ7iOhNh8)
+ *   - transform-style: preserve-3d  → los hijos mantienen su posición en el espacio 3D
+ *   - perspective                   → define la distancia del ojo al plano 3D (profundidad)
+ *   - rotateY()                     → gira el elemento sobre el eje vertical (efecto flip de página)
+ *   - backface-visibility: hidden   → oculta la cara trasera de un elemento cuando está girado
+ *   - animation-delay               → hace que cada página gire en secuencia, no todas a la vez
+ *   - z-index dinámico              → controla qué página queda "encima" durante el giro
+ *
+ * FLUJO:
+ *   LOMOS → click → LIBRO 3D con flip de tapa → páginas giran mostrando índice → ficha de fanfic
+ *
+ * REFERENCIAS:
+ *   - CSS 3D transforms: https://developer.mozilla.org/es/docs/Web/CSS/transform-function/rotateY
+ *   - perspective: https://developer.mozilla.org/es/docs/Web/CSS/perspective
+ *   - backface-visibility: https://developer.mozilla.org/es/docs/Web/CSS/backface-visibility
+ *   - animation-delay: https://developer.mozilla.org/es/docs/Web/CSS/animation-delay
+ *   - Arrays y objetos: https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Array
+ *   - Template literals: https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Template_literals
+ */
 
-// 1. BASE DE DATOS DE FANDOMS Y FANFICS
-//    Cada fandom es un objeto con: id, nombre,
-//    color de lomo, y un array de fanfics.
-//    Cada fanfic tiene: título, autor, tags,
-//    descripción y link a AO3.
+// ─────────────────────────────────────────────
+// 1. BASE DE DATOS
+// ─────────────────────────────────────────────
 const fandoms = [
   {
     id: "AOT",
@@ -27,6 +31,7 @@ const fandoms = [
     abrev: "AOT",
     colorLomo: "#6b0f1a",
     colorAccento: "#c9a84c",
+    imagenUrl: "AttackOnTitan2.jpg",
     fanfics: [
       {
         titulo: "Título 1",
@@ -62,8 +67,9 @@ const fandoms = [
     id: "Arcane",
     nombre: "Arcane",
     abrev: "ARCANE",
-    colorLomo: "#4a0000",
-    colorAccento: "#d4a843",
+    colorLomo: "#6b0f1a",
+    colorAccento: "#e8c87a",
+    imagenUrl: "arcane1.jpg",
     fanfics: [
       {
         titulo: "Título 1",
@@ -99,8 +105,9 @@ const fandoms = [
     id: "HOTD",
     nombre: "House of the Dragon",
     abrev: "HOTD",
-    colorLomo: "#6b0f1a",
-    colorAccento: "#c9a84c",
+    colorLomo: "#4a0000",
+    colorAccento: "#d4a843",
+    imagenUrl: "HOTD1.jpg",
     fanfics: [
       {
         titulo: "Título 1",
@@ -136,8 +143,9 @@ const fandoms = [
     id: "AUs",
     nombre: "AU's",
     abrev: "AU'S",
-    colorLomo: "#4a0000",
-    colorAccento: "#d4a843",
+    colorLomo: "#7a0020",
+    colorAccento: "#c9a84c",
+    imagenUrl: "AUs1.png",
     fanfics: [
       {
         titulo: "Título 1",
@@ -171,46 +179,34 @@ const fandoms = [
   }
 ];
 
-
-// 2. ESTADO DE LA APLICACIÓN
-//    Una variable que trackea en qué pantalla estamos y qué fandom/fanfic está activo.
+// ─────────────────────────────────────────────
+// 2. ESTADO
+// ─────────────────────────────────────────────
 const estado = {
-  pantalla: "lomos",      // "lomos" | "portada" | "libro" | "pagina"
-  fandomActivo: null,     // objeto del fandom seleccionado
-  fanficActivo: null      // objeto del fanfic seleccionado
+  pantalla: "lomos",
+  fandomActivo: null,
+  fanficActivo: null,
+  paginaActual: 0       // índice de la página abierta en el libro 3D
 };
 
-
-// 3. REFERENCIAS AL DOM
-//Guardamos referencias a los elementos que vamos a modificar frecuentemente.
 const bibliotecaEl = document.getElementById("biblioteca");
 
-
-// 4. FUNCIONES DE RENDER
-//Cada función dibuja una "pantalla" distinta vaciando el contenedor y construyendo el nuevo HTML con template literals.
-
-/*
-  renderLomos()
-  Dibuja la estantería con los lomos de los libros.
-  Cada lomo es un div con el nombre vertical y el color del fandom.
-*/
+// ─────────────────────────────────────────────
+// 3. RENDER: LOMOS (estantería)
+// ─────────────────────────────────────────────
 function renderLomos() {
   estado.pantalla = "lomos";
   estado.fandomActivo = null;
 
-  // Template literal: construimos HTML con datos del array
   bibliotecaEl.innerHTML = `
     <div class="estanteria">
       <p class="estanteria-hint">— Seleccioná un fandom —</p>
       <div class="lomos-grid">
-        ${fandoms.map(fandom => `
-          <div 
-            class="lomo" 
-            data-id="${fandom.id}"
-            style="--color-lomo: ${fandom.colorLomo}; --color-accento: ${fandom.colorAccento};"
-          >
+        ${fandoms.map(f => `
+          <div class="lomo" data-id="${f.id}"
+            style="--color-lomo:${f.colorLomo}; --color-accento:${f.colorAccento};">
             <div class="lomo-banda top"></div>
-            <div class="lomo-titulo">${fandom.abrev.split('').join('<br>')}</div>
+            <div class="lomo-titulo">${f.abrev.split('').join('<br>')}</div>
             <div class="lomo-banda bottom"></div>
           </div>
         `).join('')}
@@ -218,206 +214,249 @@ function renderLomos() {
     </div>
   `;
 
-  // Agregamos event listeners a cada lomo forEach itera el array de lomos ya renderizados en el DOM
-  document.querySelectorAll('.lomo').forEach(lomoEl => {
-    lomoEl.addEventListener('click', () => {
-      const id = lomoEl.dataset.id;                          // leemos el data-id
-      const fandom = fandoms.find(f => f.id === id);         // buscamos en el array
-      lomoEl.classList.add('lomo--saliendo');                // animación de salida
-      setTimeout(() => renderPortada(fandom), 350);          // esperamos que termine
+  document.querySelectorAll('.lomo').forEach(el => {
+    el.addEventListener('click', () => {
+      const fandom = fandoms.find(f => f.id === el.dataset.id);
+      el.classList.add('lomo--saliendo');
+      setTimeout(() => renderLibro3D(fandom), 400);
     });
   });
 }
 
-/*
- * renderPortada(fandom)
- * Muestra la portada del libro seleccionado.
- * Incluye título, autor/fandom y botón para abrir.
- */
-function renderPortada(fandom) {
-  estado.pantalla = "portada";
+// ─────────────────────────────────────────────
+// 4. RENDER: LIBRO 3D
+//
+//    Estructura HTML del libro:
+//    .libro-escena (perspective)
+//      └── .libro-3d (transform-style: preserve-3d)
+//            ├── .libro-tapa-front  ← cara delantera (portada)
+//            ├── .libro-tapa-back   ← cara trasera de la tapa (interior)
+//            └── .libro-paginas
+//                  ├── .pagina[data-i="0"]  ← índice (anverso/reverso con backface-visibility)
+//                  └── .pagina[data-i="1..n"] ← fichas de fanfics
+//
+//    Cada .pagina tiene dos caras:
+//      .cara-front  (lo que ves al derecho)
+//      .cara-back   (lo que ves cuando la página está girada — backface-visibility:hidden)
+//
+//    El giro se controla agregando/quitando la clase .pagina--girada (rotateY(-180deg))
+//    con animation-delay para efecto secuencial.
+// ─────────────────────────────────────────────
+function renderLibro3D(fandom) {
+  estado.pantalla = "libro";
   estado.fandomActivo = fandom;
+  estado.paginaActual = 0;
+
+  // Construimos las páginas: [índice] + [una página por fanfic]
+  // LÓGICA DE CARAS:
+  // Cada página tiene frente (cara derecha visible) y dorso (cara izquierda visible
+  // cuando ESA página está girada, es decir, la izquierda de la página SIGUIENTE).
+  //
+  // Página 0 (índice):
+  //   - frente = índice (derecha cuando el libro recién abre)
+  //   - dorso  = fondo rojo con ornamento (izquierda visible mientras se ve el índice,
+  //              antes de girar la primera página)
+  //
+  // Página 1..n (fanfics):
+  //   - frente = ficha del fanfic (derecha)
+  //   - dorso  = imagen del fandom (izquierda visible cuando esta página está girada)
+  //
+  // La cara izquierda que se ve junto al ÍNDICE es el dorso de la página 0.
+  // La cara izquierda que se ve junto a cada FANFIC es el dorso de esa misma página.
+
+  const paginas = [
+    {
+      tipo: "indice",
+      frente: `
+        <div class="pagina-ornamento-top"><span>✦</span></div>
+        <h3 class="pagina-seccion">Índice</h3>
+        <p class="pagina-fandom-nombre">${fandom.nombre}</p>
+        <ol class="indice-lista">
+          ${fandom.fanfics.map((ff, i) => `
+            <li class="indice-item" data-index="${i}">
+              <span class="indice-numero">${String(i+1).padStart(2,'0')}</span>
+              <span class="indice-titulo">${ff.titulo}</span>
+              <span class="indice-puntos"></span>
+            </li>
+          `).join('')}
+        </ol>
+        <div class="pagina-numero">i</div>
+      `,
+      // Dorso del índice = cara izquierda que se ve ANTES de pasar la primera página
+      // → fondo rojo con ornamento dorado
+      dorso: `<div class="pagina-izq-roja">
+        <div class="pagina-izq-roja-ornamento">✦</div>
+        <p class="pagina-izq-roja-nombre">${fandom.nombre}</p>
+        <div class="pagina-izq-roja-ornamento">✦</div>
+      </div>`
+    },
+    ...fandom.fanfics.map((ff, i) => ({
+      tipo: "fanfic",
+      fanficIndex: i,
+      frente: `
+        <div class="pagina-ornamento-top"><span>✦</span></div>
+        <div class="ficha">
+          <h3 class="ficha-titulo">${ff.titulo}</h3>
+          <p class="ficha-autor">por ${ff.autor}</p>
+          <div class="ficha-tags">${ff.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+          <p class="ficha-descripcion">${ff.descripcion}</p>
+          <a href="${ff.link}" target="_blank" class="ficha-link">Leer en AO3 →</a>
+        </div>
+        <div class="pagina-numero">${i + 1}</div>
+      `,
+      // Dorso de cada fanfic = cara izquierda visible mientras se lee esa ficha
+      // → imagen del fandom cubriendo toda la cara
+      dorso: `
+        ${fandom.imagenUrl
+          ? `<div class="pagina-imagen-wrapper"><img src="${fandom.imagenUrl}" alt="${fandom.nombre}" class="pagina-imagen"></div>`
+          : `<div class="pagina-izq-roja">
+               <div class="pagina-izq-roja-ornamento">✦</div>
+               <p class="pagina-izq-roja-nombre">${fandom.nombre}</p>
+               <div class="pagina-izq-roja-ornamento">✦</div>
+             </div>`
+        }
+        <div class="pagina-numero" style="position:absolute;bottom:10px;width:100%;text-align:center;">${i + 2}</div>
+      `
+    }))
+  ];
 
   bibliotecaEl.innerHTML = `
-    <div class="portada-wrapper">
-      <button class="btn-volver" id="btnVolverLomos">← Volver</button>
-      <div 
-        class="portada" 
-        id="portadaLibro"
-        style="--color-lomo: ${fandom.colorLomo}; --color-accento: ${fandom.colorAccento};"
-      >
-        <div class="portada-banda top"></div>
-        <div class="portada-contenido">
-          <div class="portada-ornamento">✦</div>
-          <h2 class="portada-titulo">${fandom.nombre}</h2>
-          <p class="portada-subtitulo">Fanfic Recs</p>
-          <div class="portada-ornamento">✦</div>
+    <div class="libro-ui">
+      <div class="libro-controles">
+        <button class="btn-volver" id="btnVolverLomos">← Volver</button>
+        <div class="libro-nav">
+          <button class="btn-pagina" id="btnPrev" disabled>‹</button>
+          <span class="libro-nav-hint">pasá las páginas</span>
+          <button class="btn-pagina" id="btnNext">›</button>
         </div>
-        <div class="portada-banda bottom"></div>
-        <p class="portada-hint">Click para abrir</p>
+      </div>
+
+      <!-- Escena 3D: perspective define la profundidad -->
+      <div class="libro-escena">
+        <div class="libro-3d" id="libro3d"
+          style="--color-lomo:${fandom.colorLomo}; --color-accento:${fandom.colorAccento};">
+
+          <!-- Tapa delantera (portada) -->
+          <div class="libro-tapa libro-tapa-front">
+            <div class="tapa-banda top"></div>
+            <div class="tapa-contenido">
+              <div class="tapa-ornamento">✦</div>
+              <h2 class="tapa-titulo">${fandom.nombre}</h2>
+              <p class="tapa-subtitulo">Fanfic Recs</p>
+              <div class="tapa-ornamento">✦</div>
+            </div>
+            <div class="tapa-banda bottom"></div>
+          </div>
+
+          <!-- Cara interior de la tapa (se ve cuando la tapa está girada) -->
+          <div class="libro-tapa libro-tapa-back">
+            <div class="tapa-interior-texto">Abrí el libro para ver el índice</div>
+          </div>
+
+          <!-- Páginas -->
+          <div class="libro-paginas">
+            ${paginas.map((p, i) => `
+              <div class="pagina" data-i="${i}" style="z-index:${paginas.length - i};">
+                <div class="cara cara-front">${p.frente}</div>
+                <div class="cara cara-back">${p.dorso}</div>
+              </div>
+            `).join('')}
+          </div>
+
+        </div>
       </div>
     </div>
   `;
 
-  // Animación de entrada
+  // Animar entrada del libro
   setTimeout(() => {
-    document.getElementById('portadaLibro')?.classList.add('portada--visible');
-  }, 50);
+    document.getElementById('libro3d')?.classList.add('libro-3d--visible');
+    // Abrir la tapa automáticamente después de un momento
+    setTimeout(() => {
+      document.getElementById('libro3d')?.classList.add('libro-3d--abierto');
+    }, 600);
+  }, 80);
 
-  // Click en portada → abre el libro
-  document.getElementById('portadaLibro').addEventListener('click', () => {
-    document.getElementById('portadaLibro').classList.add('portada--abriendo');
-    setTimeout(() => renderLibroAbierto(fandom), 500);
+  // ── Navegación por páginas ──
+  // Inicializar z-index correcto desde el arranque
+  setTimeout(() => actualizarBotones(), 700);
+  // paginaActual = índice de la próxima página a girar
+  // Girar hacia adelante: agregar clase .pagina--girada a pagina[data-i=paginaActual]
+  // Girar hacia atrás: quitar clase de pagina[data-i=paginaActual-1]
+
+  function actualizarBotones() {
+    document.getElementById('btnPrev').disabled = estado.paginaActual === 0;
+    document.getElementById('btnNext').disabled = estado.paginaActual >= paginas.length;
+    // Recalcular z-index de todas las páginas:
+    // - Páginas ya giradas: z-index bajo (quedaron atrás)
+    // - Páginas no giradas: z-index alto (la primera del stack arriba de todo)
+    //   Esto evita que el dorso de páginas posteriores se transparente
+    document.querySelectorAll('.pagina').forEach(p => {
+      const i = parseInt(p.dataset.i);
+      if (p.classList.contains('pagina--girada')) {
+        p.style.zIndex = i + 1;
+      } else {
+        p.style.zIndex = (paginas.length * 2) - i;
+      }
+    });
+  }
+
+  document.getElementById('btnNext').addEventListener('click', () => {
+    if (estado.paginaActual >= paginas.length) return;
+    const pag = document.querySelector(`.pagina[data-i="${estado.paginaActual}"]`);
+    if (pag) {
+      pag.classList.add('pagina--girada');
+      // z-index: la página girada queda debajo de las siguientes
+      pag.style.zIndex = estado.paginaActual;
+    }
+    estado.paginaActual++;
+    actualizarBotones();
+    // Scroll a la sección si es una página de fanfic
+    const pagData = paginas[estado.paginaActual - 1];
+    if (pagData?.tipo === 'fanfic') {
+      const seccion = document.getElementById(fandom.id);
+      if (seccion) seccion.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   });
 
-  // Botón volver → lomos
+  document.getElementById('btnPrev').addEventListener('click', () => {
+    if (estado.paginaActual === 0) return;
+    estado.paginaActual--;
+    const pag = document.querySelector(`.pagina[data-i="${estado.paginaActual}"]`);
+    if (pag) {
+      pag.classList.remove('pagina--girada');
+      pag.style.zIndex = paginas.length - estado.paginaActual;
+    }
+    actualizarBotones();
+  });
+
+  // Click en ítem del índice → salta directo a esa página
+  bibliotecaEl.addEventListener('click', e => {
+    const item = e.target.closest('.indice-item');
+    if (!item) return;
+    const targetIndex = parseInt(item.dataset.index) + 1; // +1 porque la pág 0 es el índice
+    // Girar todas las páginas hasta llegar
+    while (estado.paginaActual < targetIndex) {
+      const pag = document.querySelector(`.pagina[data-i="${estado.paginaActual}"]`);
+      if (pag) {
+        pag.classList.add('pagina--girada');
+        pag.style.zIndex = estado.paginaActual;
+      }
+      estado.paginaActual++;
+    }
+    actualizarBotones();
+    const seccion = document.getElementById(fandom.id);
+    if (seccion) seccion.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
   document.getElementById('btnVolverLomos').addEventListener('click', () => {
     renderLomos();
   });
 }
 
-/*
- renderLibroAbierto(fandom)
- Muestra el libro abierto con el índice de fanfics.
- La página izquierda tiene el índice; la derecha está en blanco (o decorativa).
-*/
-function renderLibroAbierto(fandom) {
-  estado.pantalla = "libro";
-
-  bibliotecaEl.innerHTML = `
-    <div class="libro-wrapper">
-      <button class="btn-volver" id="btnVolverPortada">← Cerrar libro</button>
-      <div class="libro-abierto" style="--color-lomo: ${fandom.colorLomo}; --color-accento: ${fandom.colorAccento};">
-        
-        <!-- Página izquierda: índice -->
-        <div class="libro-pagina pagina-izq">
-          <div class="pagina-ornamento-top">
-            <span>✦</span>
-          </div>
-          <h3 class="pagina-seccion">Índice</h3>
-          <p class="pagina-fandom-nombre">${fandom.nombre}</p>
-          <ol class="indice-lista">
-            ${fandom.fanfics.map((fanfic, i) => `
-              <li class="indice-item" data-index="${i}">
-                <span class="indice-numero">${String(i + 1).padStart(2, '0')}</span>
-                <span class="indice-titulo">${fanfic.titulo}</span>
-                <span class="indice-puntos"></span>
-              </li>
-            `).join('')}
-          </ol>
-          <div class="pagina-numero">i</div>
-        </div>
-
-        <!-- Lomo del libro (centro) -->
-        <div class="libro-lomo-centro"></div>
-
-        <!-- Página derecha: decorativa / bienvenida -->
-        <div class="libro-pagina pagina-der">
-          <div class="pagina-ornamento-top">
-            <span>✦</span>
-          </div>
-          <div class="pagina-der-contenido">
-            <p class="pagina-cita">"Por qué aferrarse al cannon si siempre podes leer un fanfic."</p>
-            <p class="pagina-cita-autor">— Fanfic Recs, Rocío</p>
-          </div>
-          <div class="pagina-numero">ii</div>
-        </div>
-
-      </div>
-    </div>
-  `;
-
-  // Animación de apertura
-  setTimeout(() => {
-    document.querySelector('.libro-abierto')?.classList.add('libro--visible');
-  }, 50);
-
-  // Click en cada ítem del índice → muestra la ficha Y hace scroll a la sección
-  document.querySelectorAll('.indice-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const i = parseInt(item.dataset.index);     // convertimos el string a número
-      const fanfic = fandom.fanfics[i];           // accedemos al array por índice
-      item.classList.add('indice-item--activo');
-
-      // Scroll suave a la sección del fandom en el main
-      // El id de la sección coincide con fandom.id (AOT, Arcane, etc.)
-      const seccion = document.getElementById(fandom.id);
-      if (seccion) {
-        setTimeout(() => {
-          seccion.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
-      }
-
-      setTimeout(() => renderPagina(fandom, fanfic), 250);
-    });
-  });
-
-  // Botón volver → portada
-  document.getElementById('btnVolverPortada').addEventListener('click', () => {
-    renderPortada(fandom);
-  });
-}
-
-/*
- renderPagina(fandom, fanfic)
-  Muestra la ficha completa del fanfic seleccionado:
-  título, autor, tags, descripción y link a AO3.
- */
-function renderPagina(fandom, fanfic) {
-  estado.pantalla = "pagina";
-  estado.fanficActivo = fanfic;
-
-  bibliotecaEl.innerHTML = `
-    <div class="libro-wrapper">
-      <button class="btn-volver" id="btnVolverIndice">← Volver al índice</button>
-      <div class="libro-abierto libro-abierto--pagina" style="--color-lomo: ${fandom.colorLomo}; --color-accento: ${fandom.colorAccento};">
-
-        <!-- Página izquierda: decorativa con nombre del fandom -->
-        <div class="libro-pagina pagina-izq pagina-izq--fanfic">
-          <div class="pagina-ornamento-top"><span>✦</span></div>
-          <div class="pagina-izq-fandom">
-            <p class="pagina-fandom-vertical">${fandom.nombre}</p>
-          </div>
-          <div class="pagina-numero">—</div>
-        </div>
-
-        <!-- Lomo centro -->
-        <div class="libro-lomo-centro"></div>
-
-        <!-- Página derecha: ficha del fanfic -->
-        <div class="libro-pagina pagina-der pagina-der--fanfic">
-          <div class="pagina-ornamento-top"><span>✦</span></div>
-          <div class="ficha">
-            <h3 class="ficha-titulo">${fanfic.titulo}</h3>
-            <p class="ficha-autor">por ${fanfic.autor}</p>
-            <div class="ficha-tags">
-              ${fanfic.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-            </div>
-            <p class="ficha-descripcion">${fanfic.descripcion}</p>
-            <a href="${fanfic.link}" target="_blank" class="ficha-link">
-              Leer en AO3 →
-            </a>
-          </div>
-          <div class="pagina-numero">1</div>
-        </div>
-
-      </div>
-    </div>
-  `;
-
-  setTimeout(() => {
-    document.querySelector('.libro-abierto')?.classList.add('libro--visible');
-  }, 50);
-
-  // Botón volver → índice
-  document.getElementById('btnVolverIndice').addEventListener('click', () => {
-    renderLibroAbierto(fandom);
-  });
-}
-
-
-// 5. INICIALIZACIÓN
-//    Cuando el DOM está listo, dibujamos la pantalla inicial: los lomos.
+// ─────────────────────────────────────────────
+// 5. INIT
+// ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   renderLomos();
 });

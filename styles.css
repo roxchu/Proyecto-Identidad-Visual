@@ -28,7 +28,7 @@ body {
 
 #menu-toggle { display: none; }
 
-/*Header*/
+/* ── Header ── */
 header {
     background-color: var(--rojo);
     color: var(--blanco);
@@ -65,7 +65,7 @@ header p.subtitulo {
     margin-top: 8px;
 }
 
-/*Menu-btn (hamburguesa, solo en el celu)*/
+/* ── Menu-btn (hamburger, solo mobile) ── */
 .menu-btn {
     display: none;
     font-size: 26px;
@@ -79,7 +79,7 @@ header p.subtitulo {
     user-select: none;
 }
 
-/*Clasificación label*/
+/* ── Clasificación label ── */
 h3.clasificacion {
     font-family: 'Lato', sans-serif;
     font-size: 0.7rem;
@@ -93,7 +93,7 @@ h3.clasificacion {
     border-bottom: 1px solid var(--crema-3);
 }
 
-/*Nav*/
+/* ── Nav ── */
 /* En desktop/tablet el nav hamburguesa está oculto; se usa #biblioteca */
 #nav-mobile {
     display: flex;
@@ -131,7 +131,7 @@ h3.clasificacion {
 }
 #nav-mobile div:hover a { color: var(--blanco); }
 
-/*Main*/
+/* ── Main ── */
 main {
     max-width: 860px;
     margin: 0 auto;
@@ -150,7 +150,7 @@ main > p.intro {
     border-bottom: 1px solid var(--crema-3);
 }
 
-/*Sections*/
+/* ── Sections ── */
 section {
     margin-bottom: 56px;
     padding-bottom: 48px;
@@ -179,7 +179,7 @@ section h2::after {
     background-color: var(--rojo);
 }
 
-/*Fanfic lista*/
+/* ── Fanfic list ── */
 section ul {
     list-style: none;
     display: grid;
@@ -205,7 +205,7 @@ section ul li:hover {
     background: var(--crema-2);
 }
 
-/*Footer*/
+/* ── Footer ── */
 footer {
     background-color: var(--rojo);
     color: rgba(255,255,255,0.6);
@@ -231,7 +231,9 @@ footer strong { color: var(--blanco); font-weight: 700; }
 }
 #biblioteca { display: flex; }
 
-/* RESPONSIVE — Tablet (481px – 900px)*/
+/* ══════════════════════════════════════════
+   RESPONSIVE — Tablet (481px – 900px)
+══════════════════════════════════════════ */
 @media (min-width: 481px) and (max-width: 1199px) {
 
     /* Nav en grid 2×2: [A][B] / [C][D] */
@@ -269,10 +271,12 @@ footer strong { color: var(--blanco); font-weight: 700; }
     }
 }
 
-/* Celular */
+/* ══════════════════════════════════════════
+   RESPONSIVE — Mobile (≤ 480px)
+══════════════════════════════════════════ */
 @media (max-width: 480px) {
 
-    /*El menu con JS no se muestra por cuestiones de uso de la página */
+    /* Mobile: mostrar hamburguesa, ocultar biblioteca */
     #nav-mobile { display: flex; }
     #biblioteca { display: none !important; }
 
@@ -354,18 +358,16 @@ footer strong { color: var(--blanco); font-weight: 700; }
     /* Lista sin viñetas */
     #nav-mobile ul {
         list-style: none;
-        margin: 0 auto;
+        margin: 0;
         padding: 0;
         display: flex;
         flex-direction: column;
         gap: 8px;
-        width: 80%;
     }
 
     /* Cada link: botón rojo con texto blanco */
     #nav-mobile ul li a {
         display: block;
-        align-items: center;
         padding: 14px 20px;
         background-color: var(--rojo);
         color: white;
@@ -378,8 +380,6 @@ footer strong { color: var(--blanco); font-weight: 700; }
         text-transform: uppercase;
         text-align: center;
         transition: background-color 0.2s ease, transform 0.2s ease;
-        width: 80%;
-        margin: 0 auto;
     }
 
     #nav-mobile ul li a:hover {
@@ -395,27 +395,25 @@ footer strong { color: var(--blanco); font-weight: 700; }
     main > p.intro { font-size: 0.9rem; }
 }
 
-/*BIBLIOTECA — Menú dinámico tipo librería
- Variables de lomo heredadas por JS: --color-lomo, --color-accento
-*/
+/* ══════════════════════════════════════════════════════════
+   BIBLIOTECA — Menú dinámico con efecto libro 3D
+   Técnica: perspective + rotateY + backface-visibility
+   Ref: https://www.youtube.com/watch?v=mriZ7iOhNh8
+══════════════════════════════════════════════════════════ */
 
-/* Contenedor principal que reemplaza al <nav> */
 #biblioteca {
     background: var(--crema-2);
     border-bottom: 2px solid var(--crema-3);
-    min-height: 220px;
+    min-height: 340px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px 16px;
+    padding: 24px 16px 32px;
     overflow: hidden;
 }
 
-/*Botón volver*/
+/* ── Botón volver ── */
 .btn-volver {
-    position: absolute;
-    top: 12px;
-    left: 16px;
     background: none;
     border: 1px solid var(--crema-3);
     color: var(--texto-suave);
@@ -426,7 +424,6 @@ footer strong { color: var(--blanco); font-weight: 700; }
     cursor: pointer;
     border-radius: 2px;
     transition: all 0.2s ease;
-    z-index: 10;
 }
 .btn-volver:hover {
     background: var(--rojo);
@@ -434,12 +431,14 @@ footer strong { color: var(--blanco); font-weight: 700; }
     border-color: var(--rojo);
 }
 
-/*ESTADO 1: ESTANTERÍA / LOMOS*/
+/* ─────────────────────────────────────
+   ESTANTERÍA / LOMOS
+───────────────────────────────────── */
 .estanteria {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
     width: 100%;
 }
 
@@ -453,15 +452,14 @@ footer strong { color: var(--blanco); font-weight: 700; }
 
 .lomos-grid {
     display: flex;
-    gap: 20px;
+    gap: 24px;
     justify-content: center;
     align-items: flex-end;
 }
 
-/* Cada lomo */
 .lomo {
     width: 52px;
-    height: 160px;
+    height: 165px;
     background-color: var(--color-lomo);
     border-radius: 2px 4px 4px 2px;
     display: flex;
@@ -469,34 +467,22 @@ footer strong { color: var(--blanco); font-weight: 700; }
     align-items: center;
     justify-content: space-between;
     cursor: pointer;
-    position: relative;
-    box-shadow: -3px 3px 8px rgba(0,0,0,0.35), inset -2px 0 6px rgba(0,0,0,0.2);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: -4px 4px 10px rgba(0,0,0,0.4), inset -3px 0 8px rgba(0,0,0,0.25);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     transform-origin: bottom center;
 }
-
 .lomo:hover {
-    transform: translateY(-12px) rotate(-2deg);
-    box-shadow: -5px 10px 18px rgba(0,0,0,0.4), inset -2px 0 6px rgba(0,0,0,0.2);
+    transform: translateY(-14px) rotate(-2deg);
+    box-shadow: -6px 12px 20px rgba(0,0,0,0.45), inset -3px 0 8px rgba(0,0,0,0.25);
 }
-
 .lomo--saliendo {
-    transform: translateY(-40px) scale(1.05);
+    transform: translateY(-50px) scale(1.08) !important;
     opacity: 0;
-    transition: all 0.35s ease;
+    transition: all 0.4s ease !important;
 }
-
-/* Bandas decorativas del lomo */
-.lomo-banda {
-    width: 100%;
-    height: 10px;
-    background-color: var(--color-accento);
-    opacity: 0.85;
-}
-.lomo-banda.top { border-radius: 2px 4px 0 0; }
+.lomo-banda { width: 100%; height: 10px; background-color: var(--color-accento); opacity: 0.9; }
+.lomo-banda.top  { border-radius: 2px 4px 0 0; }
 .lomo-banda.bottom { border-radius: 0 0 4px 2px; }
-
-/* Título vertical en el lomo */
 .lomo-titulo {
     flex: 1;
     display: flex;
@@ -505,7 +491,7 @@ footer strong { color: var(--blanco); font-weight: 700; }
     justify-content: center;
     color: var(--color-accento);
     font-family: 'Playfair Display', serif;
-    font-size: 1.0rem;
+    font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 2px;
     text-align: center;
@@ -513,370 +499,397 @@ footer strong { color: var(--blanco); font-weight: 700; }
     padding: 4px 0;
 }
 
-/*ESTADO 2: PORTADA*/
-.portada-wrapper {
-    position: relative;
+/* ─────────────────────────────────────
+   LIBRO UI (controles + escena)
+───────────────────────────────────── */
+.libro-ui {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    gap: 16px;
     width: 100%;
 }
 
-.portada {
-    width: 160px;
-    min-height: 220px;
+.libro-controles {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: min(680px, 95%);
+}
+
+.libro-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.libro-nav-hint {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+    opacity: 0.5;
+}
+
+.btn-pagina {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--crema-3);
+    background: var(--crema);
+    color: var(--rojo);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+.btn-pagina:hover:not(:disabled) {
+    background: var(--rojo);
+    color: var(--blanco);
+    border-color: var(--rojo);
+}
+.btn-pagina:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+/* ─────────────────────────────────────
+   ESCENA 3D
+   perspective: distancia ojo-plano.
+   Cuanto menor el valor, más dramático el efecto 3D.
+   1200px es un valor equilibrado — profundo pero no distorsionado.
+───────────────────────────────────── */
+.libro-escena {
+    perspective: 1200px;
+    width: min(680px, 95%);
+    display: flex;
+    justify-content: center;
+}
+
+/* ─────────────────────────────────────
+   LIBRO 3D
+   transform-style: preserve-3d → los hijos
+   se posicionan en el espacio 3D del padre,
+   no se aplanan como si fueran imágenes 2D.
+───────────────────────────────────── */
+.libro-3d {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    transform-style: preserve-3d;
+    opacity: 0;
+    transform: rotateY(15deg) scale(0.92);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.libro-3d--visible {
+    opacity: 1;
+    transform: rotateY(15deg) scale(1);
+}
+
+/* Cuando el libro se abre, la tapa gira -180deg hacia la izquierda */
+.libro-3d--abierto .libro-tapa-front {
+    transform: rotateY(-180deg);
+}
+
+/* ─────────────────────────────────────
+   TAPA
+   Las dos caras (front/back) se superponen
+   en el mismo espacio. backface-visibility:hidden
+   oculta cada cara cuando está "dando la espalda".
+───────────────────────────────────── */
+.libro-tapa {
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    left: 0;
+    transform-origin: right center;    /* el giro parte del lomo (borde derecho) */
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    border-radius: 4px 0 0 4px;
+    transition: transform 0.7s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+    z-index: 10;
+}
+
+.libro-tapa-front {
     background-color: var(--color-lomo);
-    border-radius: 2px 6px 6px 2px;
+    box-shadow: -6px 4px 16px rgba(0,0,0,0.4);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    cursor: pointer;
-    box-shadow: -6px 6px 20px rgba(0,0,0,0.4), inset -3px 0 10px rgba(0,0,0,0.25);
-    opacity: 0;
-    transform: scale(0.85) rotateY(15deg);
-    transition: opacity 0.4s ease, transform 0.4s ease;
-    position: relative;
-    border-left: 10px solid rgba(0,0,0,0.2);
+    overflow: hidden;
 }
 
-.portada--visible {
-    opacity: 1;
-    transform: scale(1) rotateY(0deg);
-}
-
-.portada--abriendo {
-    transform: scale(0.9) rotateY(-30deg);
-    opacity: 0;
-    transition: all 0.5s ease;
-}
-
-.portada-banda {
-    width: 100%;
-    height: 14px;
-    background-color: var(--color-accento);
-    opacity: 0.85;
-}
-.portada-banda.top { border-radius: 0 4px 0 0; }
-.portada-banda.bottom { border-radius: 0 0 4px 0; }
-
-.portada-contenido {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 16px 12px;
-    text-align: center;
-}
-
-.portada-ornamento {
-    color: var(--color-accento);
-    font-size: 1rem;
-    opacity: 0.7;
-}
-
-.portada-titulo {
-    font-family: 'Playfair Display', serif;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--color-accento);
-    line-height: 1.3;
-}
-
-.portada-subtitulo {
-    font-size: 0.65rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.5);
-}
-
-.portada-hint {
-    font-size: 0.6rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.3);
-    padding-bottom: 10px;
-    text-align: center;
-    width: 100%;
-}
-
-/* ESTADO 3 y 4: LIBRO ABIERTO*/
-.libro-wrapper {
-    position: relative;
+/* La cara trasera de la tapa ya empieza girada 180deg
+   para que al hacer flip quede en la posición correcta */
+.libro-tapa-back {
+    background-color: #f0e8d0;
+    transform: rotateY(180deg);        /* pre-girada: cara interior */
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
-    padding-top: 8px;
+    border-right: 1px solid var(--crema-3);
 }
 
-.libro-abierto {
-    display: flex;
-    width: min(680px, 98%);
-    min-height: 280px;
-    border-radius: 2px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    opacity: 0;
-    transform: scale(0.95);
-    transition: opacity 0.4s ease, transform 0.4s ease;
-    background: #faf4e8;
-}
-
-.libro--visible {
-    opacity: 1;
-    transform: scale(1);
-}
-
-/* Páginas */
-.libro-pagina {
-    flex: 1;
-    padding: 24px 20px 16px;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    min-height: 280px;
-}
-
-.pagina-izq {
-    background: #f5ead6;
-    border-right: none;
-    border-radius: 2px 0 0 2px;
-}
-
-.pagina-der {
-    background: #faf4e8;
-    border-radius: 0 2px 2px 0;
-}
-
-/* Lomo central del libro abierto */
-.libro-lomo-centro {
-    width: 16px;
-    background: linear-gradient(
-        to right,
-        rgba(0,0,0,0.15),
-        var(--color-lomo, #8B0000) 30%,
-        var(--color-lomo, #8B0000) 70%,
-        rgba(0,0,0,0.15)
-    );
-    box-shadow: inset 2px 0 4px rgba(0,0,0,0.3), inset -2px 0 4px rgba(0,0,0,0.3);
-    flex-shrink: 0;
-}
-
-/* Ornamento superior de página */
-.pagina-ornamento-top {
-    text-align: center;
-    color: var(--color-accento, #c9a84c);
-    font-size: 0.8rem;
-    margin-bottom: 12px;
-    opacity: 0.6;
-}
-
-/* Número de página */
-.pagina-numero {
-    position: absolute;
-    bottom: 10px;
-    width: calc(100% - 40px);
-    text-align: center;
-    font-size: 0.65rem;
+.tapa-interior-texto {
+    font-size: 0.7rem;
     color: var(--texto-suave);
     opacity: 0.4;
     font-style: italic;
-}
-
-/*Índice */
-.pagina-seccion {
-    font-family: 'Playfair Display', serif;
-    font-size: 0.75rem;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--texto-suave);
     text-align: center;
-    margin-bottom: 4px;
-}
-
-.pagina-fandom-nombre {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--color-lomo, var(--rojo));
-    text-align: center;
-    margin-bottom: 16px;
-}
-
-.indice-lista {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    flex: 1;
-}
-
-.indice-item {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-    cursor: pointer;
-    padding: 4px 6px;
-    border-radius: 2px;
-    transition: background 0.2s ease;
-}
-
-.indice-item:hover {
-    background: rgba(0,0,0,0.05);
-}
-
-.indice-item--activo {
-    background: rgba(0,0,0,0.08);
-}
-
-.indice-numero {
-    font-family: 'Playfair Display', serif;
-    font-size: 0.7rem;
-    color: var(--color-accento, #c9a84c);
-    flex-shrink: 0;
-}
-
-.indice-titulo {
-    font-size: 0.8rem;
-    color: var(--texto);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.indice-puntos {
-    flex: 1;
-    border-bottom: 1px dotted var(--crema-3);
-    margin-bottom: 2px;
-}
-
-/*Página derecha decorativa*/
-.pagina-der-contenido {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
     padding: 20px;
-    text-align: center;
 }
 
-.pagina-cita {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 0.85rem;
-    color: var(--texto-suave);
-    line-height: 1.6;
-}
+.tapa-banda { width: 100%; height: 14px; background-color: var(--color-accento); opacity: 0.9; }
+.tapa-banda.top    { border-radius: 4px 0 0 0; }
+.tapa-banda.bottom { border-radius: 0 0 0 4px; }
 
-.pagina-cita-autor {
-    font-size: 0.7rem;
-    letter-spacing: 1px;
-    color: var(--texto-suave);
-    opacity: 0.6;
-}
-
-/*Página de fanfic*/
-.pagina-izq--fanfic {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.pagina-fandom-vertical {
-    font-family: 'Playfair Display', serif;
-    font-size: 0.85rem;
-    color: var(--color-lomo, var(--rojo));
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    transform: rotate(180deg);
-    letter-spacing: 3px;
-    opacity: 0.5;
-}
-
-.ficha {
+.tapa-contenido {
+    flex: 1;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
     gap: 10px;
-    flex: 1;
-    padding-bottom: 20px;
+    padding: 16px 10px;
+    text-align: center;
 }
-
-.ficha-titulo {
+.tapa-ornamento { color: var(--color-accento); font-size: 0.9rem; opacity: 0.7; }
+.tapa-titulo {
     font-family: 'Playfair Display', serif;
-    font-size: 1.1rem;
+    font-size: clamp(0.75rem, 2vw, 1rem);
     font-weight: 700;
-    color: var(--color-lomo, var(--rojo));
+    color: var(--color-accento);
     line-height: 1.3;
-    border-bottom: 1px solid var(--crema-3);
-    padding-bottom: 8px;
 }
-
-.ficha-autor {
-    font-size: 0.78rem;
-    font-style: italic;
-    color: var(--texto-suave);
-}
-
-.ficha-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-}
-
-.tag {
-    font-size: 0.65rem;
-    padding: 2px 8px;
-    border: 1px solid var(--color-accento, #c9a84c);
-    color: var(--color-accento, #c9a84c);
-    border-radius: 20px;
-    letter-spacing: 0.5px;
-}
-
-.ficha-descripcion {
-    font-size: 0.78rem;
-    line-height: 1.7;
-    color: var(--texto);
-    flex: 1;
-}
-
-.ficha-link {
-    display: inline-block;
-    background: var(--color-lomo, var(--rojo));
-    color: var(--color-accento, #c9a84c);
-    text-decoration: none;
-    font-size: 0.72rem;
-    font-weight: 700;
+.tapa-subtitulo {
+    font-size: 0.6rem;
     letter-spacing: 2px;
     text-transform: uppercase;
-    padding: 8px 16px;
-    border-radius: 2px;
-    align-self: flex-start;
-    transition: opacity 0.2s ease;
+    color: rgba(255,255,255,0.45);
 }
 
-.ficha-link:hover { opacity: 0.85; }
+/* ─────────────────────────────────────
+   PÁGINAS
+   Todas apiladas a la derecha del lomo.
+   Cada una tiene dos caras (front/back).
+   .pagina--girada las rota -180deg,
+   simulando que la hoja pasó hacia la izquierda.
+───────────────────────────────────── */
+.libro-paginas {
+    position: absolute;
+    right: 0;
+    width: 50%;
+    height: 100%;
+    transform-style: preserve-3d;
+}
 
-/*RESPONSIVE BIBLIOTECA*/
+.pagina {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform-origin: left center;    /* gira desde el lomo (borde izquierdo) */
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+    cursor: default;
+}
+
+/* Clase que activa el giro de página */
+.pagina--girada {
+    transform: rotateY(-180deg);
+}
+
+/* Cara delantera y trasera de cada página */
+.cara {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;          /* se oculta cuando está de espaldas */
+    overflow: hidden;
+    padding: 18px 14px 28px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.cara-front {
+    background: #faf4e8;
+    border-left: 1px solid var(--crema-3);
+    border-radius: 0 4px 4px 0;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.08);
+}
+
+/* La cara trasera ya empieza girada 180deg */
+.cara-back {
+    background: #f5ead6;
+    transform: rotateY(180deg);
+    border-radius: 4px 0 0 4px;
+    border-right: 1px solid var(--crema-3);
+}
+
+/* ── Marco pergamino ── */
+/* Se usa ::before para el borde interior y ::after para las esquinas SVG */
+.cara-front::before,
+.cara-back::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border: 1.5px solid var(--color-accento, #c9a84c);
+    opacity: 0.45;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Esquinas decoradas con SVG inline como background-image */
+.cara-front::after,
+.cara-back::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M2 2 Q2 8 8 8' stroke='%23c9a84c' stroke-width='1.5' fill='none' opacity='0.7'/%3E%3Cpath d='M2 2 Q2 6 5 5 Q6 2 2 2' stroke='%23c9a84c' stroke-width='1' fill='none' opacity='0.5'/%3E%3C/svg%3E"),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M22 2 Q22 8 16 8' stroke='%23c9a84c' stroke-width='1.5' fill='none' opacity='0.7'/%3E%3Cpath d='M22 2 Q22 6 19 5 Q18 2 22 2' stroke='%23c9a84c' stroke-width='1' fill='none' opacity='0.5'/%3E%3C/svg%3E"),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M2 22 Q2 16 8 16' stroke='%23c9a84c' stroke-width='1.5' fill='none' opacity='0.7'/%3E%3Cpath d='M2 22 Q2 18 5 19 Q6 22 2 22' stroke='%23c9a84c' stroke-width='1' fill='none' opacity='0.5'/%3E%3C/svg%3E"),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M22 22 Q22 16 16 16' stroke='%23c9a84c' stroke-width='1.5' fill='none' opacity='0.7'/%3E%3Cpath d='M22 22 Q22 18 19 19 Q18 22 22 22' stroke='%23c9a84c' stroke-width='1' fill='none' opacity='0.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: top left, top right, bottom left, bottom right;
+    background-size: 24px 24px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* El contenido va sobre el marco */
+.cara > * { position: relative; z-index: 1; }
+
+/* ── Contenido compartido de páginas ── */
+.pagina-ornamento-top { text-align: center; color: var(--color-accento, #c9a84c); font-size: 0.75rem; margin-bottom: 10px; opacity: 0.6; }
+.pagina-numero { text-align: center; font-size: 0.6rem; color: var(--texto-suave); opacity: 0.35; font-style: italic; margin-top: auto; padding-top: 8px; }
+.pagina-seccion { font-family: 'Playfair Display', serif; font-size: 0.68rem; letter-spacing: 3px; text-transform: uppercase; color: var(--texto-suave); text-align: center; margin-bottom: 4px; }
+.pagina-fandom-nombre { font-family: 'Playfair Display', serif; font-size: clamp(0.85rem, 2vw, 1.1rem); font-weight: 700; color: var(--color-lomo, var(--rojo)); text-align: center; margin-bottom: 14px; }
+
+/* Índice */
+.indice-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.indice-item { display: flex; align-items: baseline; gap: 5px; cursor: pointer; padding: 3px 5px; border-radius: 2px; transition: background 0.2s; }
+.indice-item:hover { background: rgba(0,0,0,0.05); }
+.indice-numero { font-family: 'Playfair Display', serif; font-size: 0.65rem; color: var(--color-accento, #c9a84c); flex-shrink: 0; }
+.indice-titulo { font-size: 0.72rem; color: var(--texto); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.indice-puntos { flex: 1; border-bottom: 1px dotted var(--crema-3); margin-bottom: 2px; }
+
+/* Página decorativa */
+.pagina-der-contenido { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; padding: 10px; }
+.pagina-cita { font-family: 'Playfair Display', serif; font-style: italic; font-size: 0.78rem; color: var(--texto-suave); line-height: 1.6; }
+.pagina-cita-autor { font-size: 0.65rem; letter-spacing: 1px; color: var(--texto-suave); opacity: 0.55; }
+
+/* Ficha de fanfic */
+.ficha { display: flex; flex-direction: column; gap: 7px; flex: 1; overflow: hidden; }
+.ficha-titulo { font-family: 'Playfair Display', serif; font-size: clamp(0.8rem, 2vw, 1rem); font-weight: 700; color: var(--color-lomo, var(--rojo)); border-bottom: 1px solid var(--crema-3); padding-bottom: 6px; line-height: 1.3; }
+.ficha-autor { font-size: 0.72rem; font-style: italic; color: var(--texto-suave); }
+.ficha-tags { display: flex; flex-wrap: wrap; gap: 3px; }
+.tag { font-size: 0.6rem; padding: 2px 6px; border: 1px solid var(--color-accento, #c9a84c); color: var(--color-accento, #c9a84c); border-radius: 20px; }
+.ficha-descripcion { font-size: 0.72rem; line-height: 1.6; color: var(--texto); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; }
+.ficha-link { display: inline-block; background: var(--color-lomo, var(--rojo)); color: var(--color-accento, #c9a84c); text-decoration: none; font-size: 0.65rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 6px 12px; border-radius: 2px; align-self: flex-start; margin-top: auto; transition: opacity 0.2s; }
+.ficha-link:hover { opacity: 0.82; }
+
+/* ─────────────────────────────────────
+   RESPONSIVE BIBLIOTECA
+───────────────────────────────────── */
 @media (max-width: 480px) {
-    #biblioteca { min-height: 180px; padding: 16px 8px; }
-
-    .lomos-grid { gap: 12px; }
-    .lomo { width: 42px; height: 130px; }
-    .lomo-titulo { font-size: 0.6rem; }
-
-    .portada { width: 130px; min-height: 185px; }
-    .portada-titulo { font-size: 0.85rem; }
-
-    .libro-abierto { flex-direction: column; min-height: unset; }
-    .libro-lomo-centro { width: 100%; height: 12px; background: linear-gradient(to bottom, rgba(0,0,0,0.15), var(--color-lomo, #8B0000), rgba(0,0,0,0.15)); }
-    .pagina-izq--fanfic { display: none; }
-    .pagina-fandom-vertical { writing-mode: horizontal-tb; transform: none; }
+    #biblioteca { display: none !important; }
 }
 
-@media (min-width: 481px) and (max-width: 1199px) {
-    .libro-abierto { width: min(600px, 95%); }
+@media (min-width: 481px) and (max-width: 900px) {
+    .libro-3d { height: 240px; }
+    .tapa-titulo { font-size: 0.8rem; }
+}
+
+/* ── Imagen del fandom en cara izquierda ── */
+.pagina-imagen-wrapper {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 4px 0 0 4px;
+    z-index: 0;
+}
+
+.pagina-imagen {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0.85;
+    filter: sepia(20%) contrast(1.05);
+}
+
+/* Gradiente encima de la imagen para que el número de página sea legible */
+.pagina-imagen-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.08) 0%,
+        rgba(0,0,0,0) 40%,
+        rgba(0,0,0,0.25) 100%
+    );
+}
+
+/* ── Cara izquierda roja (índice) ── */
+.pagina-izq-roja {
+    position: absolute;
+    inset: 0;
+    background-color: var(--color-lomo, #6b0f1a);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    border-radius: 4px 0 0 4px;
+}
+
+.pagina-izq-roja-ornamento {
+    color: var(--color-accento, #c9a84c);
+    font-size: 1.1rem;
+    opacity: 0.7;
+}
+
+.pagina-izq-roja-nombre {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(0.8rem, 2vw, 1rem);
+    color: var(--color-accento, #c9a84c);
+    text-align: center;
+    padding: 0 12px;
+    line-height: 1.4;
+    letter-spacing: 1px;
+}
+
+/* Cuando la cara-back tiene imagen o fondo rojo, no mostrar el fondo claro */
+.cara-back:has(.pagina-imagen-wrapper),
+.cara-back:has(.pagina-izq-roja) {
+    background: transparent;
+    padding: 0;
+    /* Garantizar opacidad total — sin transparencias */
+    isolation: isolate;
+}
+
+/* Forzar que páginas no giradas no muestren su dorso */
+.pagina:not(.pagina--girada) .cara-back {
+    visibility: hidden;
+}
+.pagina.pagina--girada .cara-back {
+    visibility: visible;
+}
+
+/* El marco pergamino no se muestra en caras con imagen/color sólido */
+.cara-back:has(.pagina-imagen-wrapper)::before,
+.cara-back:has(.pagina-imagen-wrapper)::after,
+.cara-back:has(.pagina-izq-roja)::before,
+.cara-back:has(.pagina-izq-roja)::after {
+    display: none;
 }
