@@ -1,24 +1,5 @@
 /**
  * biblioteca.js — Menú dinámico tipo biblioteca con efecto libro 3D
- *
- * TÉCNICA CSS 3D (inspirada en: https://www.youtube.com/watch?v=mriZ7iOhNh8)
- *   - transform-style: preserve-3d  → los hijos mantienen su posición en el espacio 3D
- *   - perspective                   → define la distancia del ojo al plano 3D (profundidad)
- *   - rotateY()                     → gira el elemento sobre el eje vertical (efecto flip de página)
- *   - backface-visibility: hidden   → oculta la cara trasera de un elemento cuando está girado
- *   - animation-delay               → hace que cada página gire en secuencia, no todas a la vez
- *   - z-index dinámico              → controla qué página queda "encima" durante el giro
- *
- * FLUJO:
- *   LOMOS → click → LIBRO 3D con flip de tapa → páginas giran mostrando índice → ficha de fanfic
- *
- * REFERENCIAS:
- *   - CSS 3D transforms: https://developer.mozilla.org/es/docs/Web/CSS/transform-function/rotateY
- *   - perspective: https://developer.mozilla.org/es/docs/Web/CSS/perspective
- *   - backface-visibility: https://developer.mozilla.org/es/docs/Web/CSS/backface-visibility
- *   - animation-delay: https://developer.mozilla.org/es/docs/Web/CSS/animation-delay
- *   - Arrays y objetos: https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Array
- *   - Template literals: https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Template_literals
  */
 
 // ─────────────────────────────────────────────
@@ -29,7 +10,7 @@ const fandoms = [
     id: "AOT",
     nombre: "Attack on Titan",
     abrev: "AOT",
-    colorLomo: "#6b0f1a",
+    colorLomo: "#4a0000",
     colorAccento: "#c9a84c",
     imagenUrl: "AttackOnTitan2.jpg",
     fanfics: [
@@ -186,7 +167,7 @@ const estado = {
   pantalla: "lomos",
   fandomActivo: null,
   fanficActivo: null,
-  paginaActual: 0       // índice de la página abierta en el libro 3D
+  paginaActual: 0
 };
 
 const bibliotecaEl = document.getElementById("biblioteca");
@@ -205,9 +186,15 @@ function renderLomos() {
         ${fandoms.map(f => `
           <div class="lomo" data-id="${f.id}"
             style="--color-lomo:${f.colorLomo}; --color-accento:${f.colorAccento};">
-            <div class="lomo-banda top"></div>
-            <div class="lomo-titulo">${f.abrev.split('').join('<br>')}</div>
-            <div class="lomo-banda bottom"></div>
+            <div class="lomo-cara-top"></div>
+            <div class="lomo-cara-frontal">
+              <div class="lomo-banda top"></div>
+              <div class="lomo-titulo">${f.abrev}</div>
+              <div class="lomo-banda bottom"></div>
+            </div>
+            <div class="lomo-cara-bottom"></div>
+            <div class="lomo-cara-contratapa"></div>
+            <div class="lomo-cara-tapa"></div>
           </div>
         `).join('')}
       </div>
@@ -225,44 +212,11 @@ function renderLomos() {
 
 // ─────────────────────────────────────────────
 // 4. RENDER: LIBRO 3D
-//
-//    Estructura HTML del libro:
-//    .libro-escena (perspective)
-//      └── .libro-3d (transform-style: preserve-3d)
-//            ├── .libro-tapa-front  ← cara delantera (portada)
-//            ├── .libro-tapa-back   ← cara trasera de la tapa (interior)
-//            └── .libro-paginas
-//                  ├── .pagina[data-i="0"]  ← índice (anverso/reverso con backface-visibility)
-//                  └── .pagina[data-i="1..n"] ← fichas de fanfics
-//
-//    Cada .pagina tiene dos caras:
-//      .cara-front  (lo que ves al derecho)
-//      .cara-back   (lo que ves cuando la página está girada — backface-visibility:hidden)
-//
-//    El giro se controla agregando/quitando la clase .pagina--girada (rotateY(-180deg))
-//    con animation-delay para efecto secuencial.
 // ─────────────────────────────────────────────
 function renderLibro3D(fandom) {
   estado.pantalla = "libro";
   estado.fandomActivo = fandom;
   estado.paginaActual = 0;
-
-  // Construimos las páginas: [índice] + [una página por fanfic]
-  // LÓGICA DE CARAS:
-  // Cada página tiene frente (cara derecha visible) y dorso (cara izquierda visible
-  // cuando ESA página está girada, es decir, la izquierda de la página SIGUIENTE).
-  //
-  // Página 0 (índice):
-  //   - frente = índice (derecha cuando el libro recién abre)
-  //   - dorso  = fondo rojo con ornamento (izquierda visible mientras se ve el índice,
-  //              antes de girar la primera página)
-  //
-  // Página 1..n (fanfics):
-  //   - frente = ficha del fanfic (derecha)
-  //   - dorso  = imagen del fandom (izquierda visible cuando esta página está girada)
-  //
-  // La cara izquierda que se ve junto al ÍNDICE es el dorso de la página 0.
-  // La cara izquierda que se ve junto a cada FANFIC es el dorso de esa misma página.
 
   const paginas = [
     {
@@ -282,14 +236,13 @@ function renderLibro3D(fandom) {
         </ol>
         <div class="pagina-numero">i</div>
       `,
-      // Dorso del índice = cara izquierda que se ve ANTES de pasar la primera página
-      // → fondo rojo con ornamento dorado
       dorso: `<div class="pagina-izq-roja">
         <div class="pagina-izq-roja-ornamento">✦</div>
         <p class="pagina-izq-roja-nombre">${fandom.nombre}</p>
         <div class="pagina-izq-roja-ornamento">✦</div>
       </div>`
     },
+
     ...fandom.fanfics.map((ff, i) => ({
       tipo: "fanfic",
       fanficIndex: i,
@@ -304,8 +257,6 @@ function renderLibro3D(fandom) {
         </div>
         <div class="pagina-numero">${i + 1}</div>
       `,
-      // Dorso de cada fanfic = cara izquierda visible mientras se lee esa ficha
-      // → imagen del fandom cubriendo toda la cara
       dorso: `
         ${fandom.imagenUrl
           ? `<div class="pagina-imagen-wrapper"><img src="${fandom.imagenUrl}" alt="${fandom.nombre}" class="pagina-imagen"></div>`
@@ -315,10 +266,42 @@ function renderLibro3D(fandom) {
                <div class="pagina-izq-roja-ornamento">✦</div>
              </div>`
         }
-        <div class="pagina-numero" style="position:absolute;bottom:10px;width:100%;text-align:center;">${i + 2}</div>
       `
-    }))
+    })),
+
+    {
+      tipo: "contratapa",
+      frente: `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:20px;text-align:center;padding:20px;">
+          <div style="color:var(--color-accento,#c9a84c);font-size:1.2rem;opacity:0.6;">✦</div>
+          <p style="font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(0.85rem,1.5vw,1rem);color:var(--texto-suave);line-height:1.7;max-width:320px;">
+            "Las historias son la forma en que los humanos le dan sentido al mundo."
+          </p>
+          <p style="font-size:0.7rem;letter-spacing:1.5px;color:var(--texto-suave);opacity:0.55;">— Fanfic Recs, Rocío Monzón</p>
+          <div style="color:var(--color-accento,#c9a84c);font-size:1rem;opacity:0.5;">✦</div>
+          <p style="font-size:0.6rem;letter-spacing:3px;text-transform:uppercase;color:var(--texto-suave);opacity:0.3;margin-top:8px;">fin</p>
+        </div>
+      `,
+      dorso: ``
+    }
   ];
+
+  function contenidoIzq(tipo) {
+    if (tipo === 'indice' || tipo === 'contratapa') {
+      return `<div class="pagina-izq-roja">
+        <div class="pagina-izq-roja-ornamento">✦</div>
+        <p class="pagina-izq-roja-nombre">${fandom.nombre}</p>
+        <div class="pagina-izq-roja-ornamento">✦</div>
+      </div>`;
+    }
+    return fandom.imagenUrl
+      ? `<div class="pagina-imagen-wrapper"><img src="${fandom.imagenUrl}" alt="${fandom.nombre}" class="pagina-imagen"></div>`
+      : `<div class="pagina-izq-roja">
+           <div class="pagina-izq-roja-ornamento">✦</div>
+           <p class="pagina-izq-roja-nombre">${fandom.nombre}</p>
+           <div class="pagina-izq-roja-ornamento">✦</div>
+         </div>`;
+  }
 
   bibliotecaEl.innerHTML = `
     <div class="libro-ui">
@@ -331,12 +314,10 @@ function renderLibro3D(fandom) {
         </div>
       </div>
 
-      <!-- Escena 3D: perspective define la profundidad -->
       <div class="libro-escena">
         <div class="libro-3d" id="libro3d"
           style="--color-lomo:${fandom.colorLomo}; --color-accento:${fandom.colorAccento};">
 
-          <!-- Tapa delantera (portada) -->
           <div class="libro-tapa libro-tapa-front">
             <div class="tapa-banda top"></div>
             <div class="tapa-contenido">
@@ -347,18 +328,20 @@ function renderLibro3D(fandom) {
             </div>
             <div class="tapa-banda bottom"></div>
           </div>
-
-          <!-- Cara interior de la tapa (se ve cuando la tapa está girada) -->
           <div class="libro-tapa libro-tapa-back">
-            <div class="tapa-interior-texto">Abrí el libro para ver el índice</div>
+            <div class="tapa-interior-texto">✦</div>
           </div>
 
-          <!-- Páginas -->
+          <div class="libro-pagina-izq" id="paginaIzq">
+            ${contenidoIzq('indice')}
+          </div>
+
+          <div class="libro-lomo-centro"></div>
+
           <div class="libro-paginas">
             ${paginas.map((p, i) => `
-              <div class="pagina" data-i="${i}" style="z-index:${paginas.length - i};">
+              <div class="pagina" data-i="${i}" data-tipo="${p.tipo}" style="z-index:${paginas.length - i};">
                 <div class="cara cara-front">${p.frente}</div>
-                <div class="cara cara-back">${p.dorso}</div>
               </div>
             `).join('')}
           </div>
@@ -368,95 +351,198 @@ function renderLibro3D(fandom) {
     </div>
   `;
 
-  // Animar entrada del libro
-  setTimeout(() => {
-    document.getElementById('libro3d')?.classList.add('libro-3d--visible');
-    // Abrir la tapa automáticamente después de un momento
-    setTimeout(() => {
-      document.getElementById('libro3d')?.classList.add('libro-3d--abierto');
-    }, 600);
-  }, 80);
-
-  // ── Navegación por páginas ──
-  // Inicializar z-index correcto desde el arranque
-  setTimeout(() => actualizarBotones(), 700);
-  // paginaActual = índice de la próxima página a girar
-  // Girar hacia adelante: agregar clase .pagina--girada a pagina[data-i=paginaActual]
-  // Girar hacia atrás: quitar clase de pagina[data-i=paginaActual-1]
-
-  function actualizarBotones() {
-    document.getElementById('btnPrev').disabled = estado.paginaActual === 0;
-    document.getElementById('btnNext').disabled = estado.paginaActual >= paginas.length;
-    // Recalcular z-index de todas las páginas:
-    // - Páginas ya giradas: z-index bajo (quedaron atrás)
-    // - Páginas no giradas: z-index alto (la primera del stack arriba de todo)
-    //   Esto evita que el dorso de páginas posteriores se transparente
+  function recalcZIndex() {
     document.querySelectorAll('.pagina').forEach(p => {
       const i = parseInt(p.dataset.i);
-      if (p.classList.contains('pagina--girada')) {
-        p.style.zIndex = i + 1;
-      } else {
-        p.style.zIndex = (paginas.length * 2) - i;
-      }
+      p.style.zIndex = p.classList.contains('pagina--girada')
+        ? i + 1
+        : (paginas.length * 2) - i;
     });
   }
 
-  document.getElementById('btnNext').addEventListener('click', () => {
-    if (estado.paginaActual >= paginas.length) return;
+  function recalcVisibility() {
+    document.querySelectorAll('.pagina').forEach(p => {
+      const back = p.querySelector('.cara-back');
+      if (!back) return;
+      back.style.visibility = p.classList.contains('pagina--girada') ? 'visible' : 'hidden';
+    });
+  }
+
+  function actualizarBotones() {
+    document.getElementById('btnPrev').disabled = estado.paginaActual === 0;
+    document.getElementById('btnNext').disabled = estado.paginaActual >= paginas.length - 1;
+    recalcZIndex();
+    recalcVisibility();
+    const libro = document.getElementById('libro3d');
+    if (!libro) return;
+    const esContratapa = paginas[estado.paginaActual]?.tipo === 'contratapa';
+    libro.classList.toggle('libro-3d--contratapa', esContratapa);
+  }
+
+  function actualizarPaginaIzq() {
+    const izq = document.getElementById('paginaIzq');
+    if (!izq) return;
+    const tipoPagActual = paginas[estado.paginaActual]?.tipo || 'indice';
+    izq.innerHTML = contenidoIzq(tipoPagActual);
+  }
+
+  function girarAdelante() {
+    if (estado.paginaActual >= paginas.length - 1) return;
     const pag = document.querySelector(`.pagina[data-i="${estado.paginaActual}"]`);
-    if (pag) {
-      pag.classList.add('pagina--girada');
-      // z-index: la página girada queda debajo de las siguientes
-      pag.style.zIndex = estado.paginaActual;
-    }
+    if (pag) pag.classList.add('pagina--girada');
     estado.paginaActual++;
     actualizarBotones();
-    // Scroll a la sección si es una página de fanfic
-    const pagData = paginas[estado.paginaActual - 1];
-    if (pagData?.tipo === 'fanfic') {
-      const seccion = document.getElementById(fandom.id);
-      if (seccion) seccion.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  });
+    actualizarPaginaIzq();
+  }
+
+  setTimeout(() => {
+    document.getElementById('libro3d')?.classList.add('libro-3d--visible');
+    setTimeout(() => {
+      document.getElementById('libro3d')?.classList.add('libro-3d--abierto');
+      recalcZIndex();
+      recalcVisibility();
+    }, 600);
+  }, 80);
+
+  document.getElementById('btnNext').addEventListener('click', girarAdelante);
 
   document.getElementById('btnPrev').addEventListener('click', () => {
     if (estado.paginaActual === 0) return;
     estado.paginaActual--;
     const pag = document.querySelector(`.pagina[data-i="${estado.paginaActual}"]`);
-    if (pag) {
-      pag.classList.remove('pagina--girada');
-      pag.style.zIndex = paginas.length - estado.paginaActual;
-    }
+    if (pag) pag.classList.remove('pagina--girada');
     actualizarBotones();
+    actualizarPaginaIzq();
   });
 
-  // Click en ítem del índice → salta directo a esa página
   bibliotecaEl.addEventListener('click', e => {
     const item = e.target.closest('.indice-item');
     if (!item) return;
-    const targetIndex = parseInt(item.dataset.index) + 1; // +1 porque la pág 0 es el índice
-    // Girar todas las páginas hasta llegar
+    const targetIndex = parseInt(item.dataset.index) + 1;
     while (estado.paginaActual < targetIndex) {
       const pag = document.querySelector(`.pagina[data-i="${estado.paginaActual}"]`);
-      if (pag) {
-        pag.classList.add('pagina--girada');
-        pag.style.zIndex = estado.paginaActual;
-      }
+      if (pag) pag.classList.add('pagina--girada');
       estado.paginaActual++;
     }
     actualizarBotones();
-    const seccion = document.getElementById(fandom.id);
-    if (seccion) seccion.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    actualizarPaginaIzq();
   });
 
-  document.getElementById('btnVolverLomos').addEventListener('click', () => {
-    renderLomos();
-  });
+  document.getElementById('btnVolverLomos').addEventListener('click', () => renderLomos());
 }
 
 // ─────────────────────────────────────────────
-// 5. INIT
+// 5. MODAL DE FANFIC INDIVIDUAL
+// ─────────────────────────────────────────────
+function abrirModalFanfic(fandom, fanfic) {
+  let modal = document.getElementById('fanfic-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'fanfic-modal';
+    modal.className = 'fanfic-modal';
+    document.body.appendChild(modal);
+  }
+
+  modal.innerHTML = `
+    <div class="fanfic-modal-overlay"></div>
+    <div class="fanfic-modal-contenido">
+      <button class="fanfic-modal-cerrar">✕</button>
+
+      <div class="fanfic-modal-header">
+        <div style="color: ${fandom.colorAccento}; font-size: 0.8rem; opacity: 0.8; letter-spacing: 1px; text-transform: uppercase;">
+          ${fandom.nombre}
+        </div>
+      </div>
+
+      <div class="fanfic-modal-body">
+        <div class="fanfic-modal-ornamento">✦</div>
+
+        <h2 class="fanfic-modal-titulo">${fanfic.titulo}</h2>
+
+        <p class="fanfic-modal-autor">por ${fanfic.autor}</p>
+
+        <div class="fanfic-modal-tags">
+          ${fanfic.tags.map(t => `
+            <span class="fanfic-modal-tag" style="border-color: ${fandom.colorAccento}; color: ${fandom.colorAccento};">
+              ${t}
+            </span>
+          `).join('')}
+        </div>
+
+        <p class="fanfic-modal-descripcion">${fanfic.descripcion}</p>
+
+        <a href="${fanfic.link}" target="_blank" class="fanfic-modal-link" style="background-color: ${fandom.colorLomo}; color: ${fandom.colorAccento};">
+          Leer en AO3 →
+        </a>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('fanfic-modal--abierto');
+
+  const overlay = modal.querySelector('.fanfic-modal-overlay');
+  const btnCerrar = modal.querySelector('.fanfic-modal-cerrar');
+
+  overlay.addEventListener('click', () => modal.classList.remove('fanfic-modal--abierto'));
+  btnCerrar.addEventListener('click', () => modal.classList.remove('fanfic-modal--abierto'));
+}
+
+// ─────────────────────────────────────────────
+// 6. INIT
 // ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  renderLomos();
+  // Desktop/Tablet: mostrar biblioteca
+  if (window.innerWidth > 480) {
+    renderLomos();
+  }
+
+  // Mobile: hacer clickeable los <li> de las secciones
+  if (window.innerWidth <= 480) {
+    document.querySelectorAll('main section ul li').forEach(li => {
+      li.style.cursor = 'pointer';
+      li.addEventListener('click', () => {
+        // Encontrar la sección padre
+        const section = li.closest('section');
+        const fandomId = section.id;
+        const fandom = fandoms.find(f => f.id === fandomId);
+        
+        // Encontrar el índice del <li> dentro de su <ul>
+        const ul = li.closest('ul');
+        const liItems = Array.from(ul.querySelectorAll('li'));
+        const fanficIndex = liItems.indexOf(li);
+        
+        if (fandom && fandom.fanfics[fanficIndex]) {
+          const fanfic = fandom.fanfics[fanficIndex];
+          abrirModalFanfic(fandom, fanfic);
+        }
+      });
+    });
+  }
+
+  // Mobile: listeners para nav mobile
+  if (window.innerWidth <= 480) {
+    document.querySelectorAll('#nav-mobile a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const fandomId = link.dataset.fandom;
+        const fandom = fandoms.find(f => f.id === fandomId);
+        
+        if (fandom) {
+          // Mostrar primer fanfic del fandom
+          abrirModalFanfic(fandom, fandom.fanfics[0]);
+        }
+
+        document.getElementById('menu-toggle').checked = false;
+      });
+    });
+  }
+
+  // Resize: adaptar vista
+  window.addEventListener('resize', () => {
+    const isDesktop = window.innerWidth >= 1200;
+
+    if (isDesktop && !document.querySelector('.lomo')) {
+      renderLomos();
+    }
+  });
 });
