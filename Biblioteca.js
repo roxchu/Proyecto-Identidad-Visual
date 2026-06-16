@@ -205,7 +205,7 @@ function renderLomos() {
     el.addEventListener('click', () => {
       const fandom = fandoms.find(f => f.id === el.dataset.id);
       el.classList.add('lomo--saliendo');
-      setTimeout(() => renderLibro3D(fandom), 400);
+      setTimeout(() => renderLibro3D(fandom), 1100);
     });
   });
 }
@@ -305,20 +305,11 @@ function renderLibro3D(fandom) {
 
   bibliotecaEl.innerHTML = `
     <div class="libro-ui">
-      <div class="libro-controles">
-        <button class="btn-volver" id="btnVolverLomos">← Volver</button>
-        <div class="libro-nav">
-          <button class="btn-pagina" id="btnPrev" disabled>‹</button>
-          <span class="libro-nav-hint">pasá las páginas</span>
-          <button class="btn-pagina" id="btnNext">›</button>
-        </div>
-      </div>
-
       <div class="libro-escena">
         <div class="libro-3d" id="libro3d"
           style="--color-lomo:${fandom.colorLomo}; --color-accento:${fandom.colorAccento};">
 
-          <div class="libro-tapa libro-tapa-front">
+          <div class="libro-tapa libro-tapa-front libro-tapa-front--oculta">
             <div class="tapa-banda top"></div>
             <div class="tapa-contenido">
               <div class="tapa-ornamento">✦</div>
@@ -328,7 +319,7 @@ function renderLibro3D(fandom) {
             </div>
             <div class="tapa-banda bottom"></div>
           </div>
-          <div class="libro-tapa libro-tapa-back">
+          <div class="libro-tapa libro-tapa-back libro-tapa-back--oculta">
             <div class="tapa-interior-texto">✦</div>
           </div>
 
@@ -346,6 +337,15 @@ function renderLibro3D(fandom) {
             `).join('')}
           </div>
 
+        </div>
+      </div>
+      <div class="libro-controles">
+        <div class="libro-nav">
+          <button class="btn-volver" id="btnVolverLomos">← Volver</button>
+          <button class="btn-pagina" id="btnPrev" disabled>‹</button>
+          <button class="btn-indice" id="btnIndice" title="Ir al índice">☰</button>
+          <span class="libro-nav-hint">pasá las páginas</span>
+          <button class="btn-pagina" id="btnNext">›</button>
         </div>
       </div>
     </div>
@@ -396,15 +396,29 @@ function renderLibro3D(fandom) {
   }
 
   setTimeout(() => {
-    document.getElementById('libro3d')?.classList.add('libro-3d--visible');
-    setTimeout(() => {
-      document.getElementById('libro3d')?.classList.add('libro-3d--abierto');
-      recalcZIndex();
-      recalcVisibility();
-    }, 600);
+    const libro = document.getElementById('libro3d');
+    if (!libro) return;
+    libro.style.opacity = '0';
+    libro.classList.add('libro-3d--abierto');
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        libro.style.transition = 'opacity 0.6s ease';
+        libro.style.opacity = '1';
+        recalcZIndex();
+        recalcVisibility();
+      });
+    });
   }, 80);
 
   document.getElementById('btnNext').addEventListener('click', girarAdelante);
+  document.getElementById('btnIndice').addEventListener('click', () => {
+    document.querySelectorAll('.pagina.pagina--girada').forEach(p => {
+      p.classList.remove('pagina--girada');
+    });
+    estado.paginaActual = 0;
+    actualizarBotones();
+    actualizarPaginaIzq();
+  });
 
   document.getElementById('btnPrev').addEventListener('click', () => {
     if (estado.paginaActual === 0) return;
@@ -428,7 +442,10 @@ function renderLibro3D(fandom) {
     actualizarPaginaIzq();
   });
 
-  document.getElementById('btnVolverLomos').addEventListener('click', () => renderLomos());
+  document.getElementById('btnVolverLomos').addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    renderLomos();
+  });
 }
 
 // ─────────────────────────────────────────────
@@ -491,58 +508,114 @@ function abrirModalFanfic(fandom, fanfic) {
 // 6. INIT
 // ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  // Desktop/Tablet: mostrar biblioteca
-  if (window.innerWidth > 480) {
+  if (window.innerWidth <= 480) {
+    renderMobileGrid();
+  } else {
     renderLomos();
   }
 
-  // Mobile: hacer clickeable los <li> de las secciones
-  if (window.innerWidth <= 480) {
-    document.querySelectorAll('main section ul li').forEach(li => {
-      li.style.cursor = 'pointer';
-      li.addEventListener('click', () => {
-        // Encontrar la sección padre
-        const section = li.closest('section');
-        const fandomId = section.id;
-        const fandom = fandoms.find(f => f.id === fandomId);
-        
-        // Encontrar el índice del <li> dentro de su <ul>
-        const ul = li.closest('ul');
-        const liItems = Array.from(ul.querySelectorAll('li'));
-        const fanficIndex = liItems.indexOf(li);
-        
-        if (fandom && fandom.fanfics[fanficIndex]) {
-          const fanfic = fandom.fanfics[fanficIndex];
-          abrirModalFanfic(fandom, fanfic);
-        }
-      });
-    });
-  }
-
-  // Mobile: listeners para nav mobile
-  if (window.innerWidth <= 480) {
-    document.querySelectorAll('#nav-mobile a').forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const fandomId = link.dataset.fandom;
-        const fandom = fandoms.find(f => f.id === fandomId);
-        
-        if (fandom) {
-          // Mostrar primer fanfic del fandom
-          abrirModalFanfic(fandom, fandom.fanfics[0]);
-        }
-
-        document.getElementById('menu-toggle').checked = false;
-      });
-    });
-  }
-
-  // Resize: adaptar vista
   window.addEventListener('resize', () => {
-    const isDesktop = window.innerWidth >= 1200;
-
-    if (isDesktop && !document.querySelector('.lomo')) {
-      renderLomos();
+    if (window.innerWidth <= 480) {
+      if (!document.querySelector('.mobile-libros-grid')) {
+        renderMobileGrid();
+      }
+    } else {
+      if (!document.querySelector('.lomo')) {
+        renderLomos();
+      }
     }
   });
+
+  // Fix 1: bloquear scroll del body cuando el menú hamburguesa está abierto
+  const menuToggle = document.getElementById('menu-toggle');
+  if (menuToggle) {
+    menuToggle.addEventListener('change', () => {
+      document.body.style.overflow = menuToggle.checked ? 'hidden' : '';
+    });
+    // También cerrar con los links de contacto restaura el scroll
+    document.querySelectorAll('#nav-mobile a').forEach(link => {
+      link.addEventListener('click', () => {
+        document.body.style.overflow = '';
+      });
+    });
+  }
 });
+// ─────────────────────────────────────────────
+// 7. MOBILE: GRILLA 2×2
+// ─────────────────────────────────────────────
+function renderMobileGrid() {
+  document.querySelectorAll('main section').forEach(s => s.style.display = 'none');
+  const intro = document.querySelector('main > p.intro');
+  if (intro) intro.style.display = 'none';
+
+  // Evitar duplicados
+  if (document.querySelector('.mobile-libros-grid')) return;
+
+  const main = document.querySelector('main');
+  const grid = document.createElement('div');
+  grid.className = 'mobile-libros-grid';
+  grid.innerHTML = fandoms.map(f => `
+    <div class="mobile-libro-card" data-id="${f.id}"
+      style="--color-lomo:${f.colorLomo}; --color-accento:${f.colorAccento}; background-color:${f.colorLomo};">
+      <div class="mobile-libro-card-overlay">
+        <div class="mobile-libro-card-ornamento">✦</div>
+        <div class="mobile-libro-card-titulo">${f.nombre}</div>
+        <div class="mobile-libro-card-sub">Fanfic Recs</div>
+        <div class="mobile-libro-card-ornamento">✦</div>
+      </div>
+    </div>
+  `).join('');
+  main.prepend(grid);
+
+  grid.querySelectorAll('.mobile-libro-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const fandom = fandoms.find(f => f.id === card.dataset.id);
+      if (fandom) abrirPanelMobile(fandom);
+    });
+  });
+}
+
+// ─────────────────────────────────────────────
+// 8. MOBILE: PANEL LATERAL
+// ─────────────────────────────────────────────
+function abrirPanelMobile(fandom) {
+  let panel = document.getElementById('fandom-panel-mobile');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'fandom-panel-mobile';
+    panel.className = 'fandom-mobile-panel';
+    document.body.appendChild(panel);
+  }
+
+  panel.innerHTML = `
+    <div class="fmp-overlay"></div>
+    <div class="fmp-sheet">
+      <button class="fmp-cerrar">✕</button>
+      <div class="fmp-header" style="background: linear-gradient(135deg, ${fandom.colorLomo}, ${fandom.colorLomo}cc);">
+        <div class="fmp-categoria" style="color:${fandom.colorAccento};">✦ Fanfic Recs ✦</div>
+        <div class="fmp-nombre">${fandom.nombre}</div>
+        <div class="fmp-ornamento" style="color:${fandom.colorAccento};">✦</div>
+      </div>
+      <div class="fmp-lista">
+        ${fandom.fanfics.map((ff, i) => `
+          <div class="fmp-ficha" style="border-left-color:${fandom.colorLomo};">
+            <div class="fmp-ficha-num">${String(i+1).padStart(2,'0')}</div>
+            <div class="fmp-ficha-cuerpo">
+              <div class="fmp-titulo">${ff.titulo}</div>
+              <div class="fmp-autor">por ${ff.autor}</div>
+              <div class="fmp-tags">
+                ${ff.tags.map(t => `<span class="fmp-tag" style="color:${fandom.colorLomo}; border-color:${fandom.colorLomo};">${t}</span>`).join('')}
+              </div>
+              <p class="fmp-desc">${ff.descripcion}</p>
+              <a href="${ff.link}" target="_blank" class="fmp-link" style="background-color:${fandom.colorLomo}; color:${fandom.colorAccento};">Leer en AO3 →</a>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  panel.classList.add('fmp--abierto');
+  panel.querySelector('.fmp-overlay').addEventListener('click', () => panel.classList.remove('fmp--abierto'));
+  panel.querySelector('.fmp-cerrar').addEventListener('click', () => panel.classList.remove('fmp--abierto'));
+}

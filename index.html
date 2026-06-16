@@ -21,17 +21,26 @@
 
    <!-- Nav hamburguesa: lo ves solo en el celu -->
   <nav id="nav-mobile">
+    <div class="nav-mobile-section-title">Ideas para agregar</div>
     <div>
-      <a href="#AOT" data-fandom="AOT">Attack on Titan</a>
+      <span class="nav-mobile-idea">✦ Nuevos fandoms</span>
     </div>
     <div>
-      <a href="#Arcane" data-fandom="Arcane">Arcane</a>
+      <span class="nav-mobile-idea">✦ Sistema de favoritos</span>
     </div>
     <div>
-      <a href="#HOTD" data-fandom="HOTD">House of the Dragon</a>
+      <span class="nav-mobile-idea">✦ Filtro por tags</span>
+    </div>
+    <div class="nav-mobile-divider"></div>
+    <div class="nav-mobile-section-title">Contacto</div>
+    <div>
+      <a href="mailto:rocio@example.com" class="nav-mobile-contacto">✉ rocio@example.com</a>
     </div>
     <div>
-      <a href="#AUs" data-fandom="AUs">AU's</a>
+      <a href="https://archiveofourown.org" target="_blank" class="nav-mobile-contacto">⌖ AO3 Profile</a>
+    </div>
+    <div>
+      <a href="https://twitter.com" target="_blank" class="nav-mobile-contacto">✶ Twitter / X</a>
     </div>
   </nav>
 
@@ -90,7 +99,7 @@
 
   <script src="Biblioteca.js"></script>
   <script>
-    // Cierra el menú hamburguesa mobile al hacer click en cualquier link
+    // Cierra el menú hamburguesa mobile al hacer click en links de contacto
     document.querySelectorAll('#nav-mobile a').forEach(function(link) {
       link.addEventListener('click', function() {
         document.getElementById('menu-toggle').checked = false;
