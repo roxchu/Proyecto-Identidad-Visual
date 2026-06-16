@@ -179,9 +179,9 @@ footer {
 footer strong { color: var(--blanco); font-weight: 700; }
 
 /* ══════════════════════════════════════════
-   RESPONSIVE — Desktop (≥ 1200px)
+   RESPONSIVE — Desktop (> 480px)
 ══════════════════════════════════════════ */
-@media (min-width: 1200px) {
+@media (min-width: 481px) {
     #nav-mobile { 
         display: none !important; 
     }
@@ -194,42 +194,6 @@ footer strong { color: var(--blanco); font-weight: 700; }
     main section { 
         display: none !important; 
     }
-    .mobile-libros-grid {
-        display: none !important;
-    }
-}
-
-/* ══════════════════════════════════════════
-   RESPONSIVE — Tablet (481px – 1199px)
-══════════════════════════════════════════ */
-@media (min-width: 481px) and (max-width: 1199px) {
-    #nav-mobile {
-        display: none !important;
-    }
-
-    .menu-btn { 
-        display: none !important; 
-    }
-
-    #biblioteca { 
-        display: flex !important; 
-    }
-
-    main section { 
-        display: none !important; 
-    }
-
-    main { 
-        padding: 36px 32px 56px; 
-    }
-
-    section ul {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: auto auto;
-        gap: 12px;
-    }
-
     .mobile-libros-grid {
         display: none !important;
     }
